@@ -19,8 +19,9 @@ function buildSendOrderMessage(alliance, countdown, leaders) {
 
   let message = `⚔️ **March Timing — Send Order**\n`;
   message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-  message += `**Alliance:** ${alliance}\n`;
-  message += `**Countdown:** ${countdown}s | All marches arrive at **0s**\n\n`;
+  message += `⏱️ **Countdown:** ${countdown}s | All marches arrive at **0s**\n`;
+  message += `🏰 **Alliance:** ${alliance}\n`;
+  message += `📊 **${sortedLeaders.length} rally leaders tracked**\n\n`;
   message += `━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   sortedLeaders.forEach((leader, index) => {
@@ -33,15 +34,21 @@ function buildSendOrderMessage(alliance, countdown, leaders) {
       const previousSendAt = previousLeader.marchTime - shortestMarch;
       const secondsAfterPrevious = previousSendAt - sendAt;
 
-      message += `➡️ **${leader.name}** — ${leader.marchTime}s ← Send **${secondsAfterPrevious}s** after **${previousLeader.name}**\n`;
+      if (secondsAfterPrevious === 0) {
+        message += `➡️ **${leader.name}** — ${leader.marchTime}s ← Send **same time** as **${previousLeader.name}**\n`;
+      } else {
+        message += `➡️ **${leader.name}** — ${leader.marchTime}s ← Send **${secondsAfterPrevious}s after ${previousLeader.name}**\n`;
+      }
     }
 
     message += `🧭 Countdown: Send at **${sendAt}s**\n\n`;
   });
 
+  message += `━━━━━━━━━━━━━━━━━━━━\n`;
+  message += `📝 Use **/setrally** to add or update a rally leader.\n`;
+
   return message;
 }
-
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('sendorder')
