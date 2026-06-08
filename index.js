@@ -45,32 +45,40 @@ client.once('ready', () => {
 });
 
 client.on('interactionCreate', async interaction => {
-  console.log(`Interaction received: ${interaction.commandName}`);
-
   if (!interaction.isChatInputCommand()) return;
 
   const command = client.commands.get(interaction.commandName);
-
-  if (!command) {
-    console.log(`No command found for: ${interaction.commandName}`);
-    return;
-  }
+  if (!command) return;
 
   try {
     await command.execute(interaction);
   } catch (error) {
     console.error(`Error executing ${interaction.commandName}:`, error);
 
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({
-        content: 'There was an error while executing this command.',
-        ephemeral: true
-      });
-    } else {
-      await interaction.reply({
-        content: 'There was an error while executing this command.',
-        ephemeral: true
-      });
+    const errorMessage = 'There was an error executing that command!';
+    
+    try {
+      if (interaction.deferred) {
+        await interaction.editReply({ content: errorMessage });
+      } else if (!interaction.replied) {
+        await interaction.reply({ content: errorMessage, flags: 64 });
+      }
+    } catch (err) {
+      console.error('Error sending error response:', err);
     }
   }
 });
+
+// Create a simple HTTP server
+const server = http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end('Bot is running!');
+});
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`HTTP server running on port ${PORT}`);
+});
+
+// Login
+client.login(process.env.DISCORD_TOKEN);
